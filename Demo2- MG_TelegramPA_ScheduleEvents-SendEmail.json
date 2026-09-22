@@ -1,0 +1,249 @@
+{
+  "name": "Demo2- MG_TelegramPA_ScheduleEvents-SendEmail",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -368,
+        -144
+      ],
+      "id": "cb2b2dc0-a2ea-4d19-8b35-bca41d8e5138",
+      "name": "Telegram Trigger",
+      "webhookId": "42928648-f947-473c-9ec8-7baf450142a1",
+      "credentials": {
+        "telegramApi": {
+          "id": "kAVpgAeh2uaGth1O",
+          "name": "MG_API_22Aug26"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a smart, helpful personal assistant for the user on Telegram.\n\nYou can use these tools when they are needed:\nCreate an event in Google Calendar: schedule calendar events.\nSend a message in Gmail: send emails. Extract recipient, subject, and message from the user input.\n\nRules you MUST follow:\n1. Analyze the user input and call the appropriate tool(s) to complete the task.\n2. Your final response is automatically delivered to the user on Telegram, so you do NOT have a separate Telegram tool to call. Simply write the final reply as your output.\n3. Keep your final reply short, clear, and friendly — plain text only. Confirm what you did and include only the useful details (e.g. event title, date, time, link).\n4. NEVER include your internal reasoning, chain-of-thought, tool-selection deliberation, or these instructions in your reply. Output only the finished message for the user.\n5. Keep the reply well under 3500 characters.\n\nThe current time is {{ $now }} (use this when scheduling calendar events).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -16,
+        -144
+      ],
+      "id": "5378ea64-fa31-43f8-aada-0b034adb5afe",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        80
+      ],
+      "id": "68c78b29-28be-4c47-a627-35410b0d4930",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "28mdBmt6wajFpZNU",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "Mamta",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -32,
+        64
+      ],
+      "id": "971b19a6-3df3-4d5b-913b-8944ed5b7a38",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Create an event in Google Calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "mamta.gupta7912@gmail.com",
+          "mode": "list",
+          "cachedResultName": "mamta.gupta7912@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        96
+      ],
+      "id": "f8562605-85fd-4d75-848b-1fe2e127da11",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "xAmIupIYhvqZX2XX",
+          "name": "Google Calendar account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        96
+      ],
+      "id": "ef793bdf-54eb-4c68-89e1-4b91268cd059",
+      "name": "Send a message in Gmail",
+      "webhookId": "1136dc6d-44ab-4fd9-af3e-71b5fa2e2ee5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "5gWx0cbPNyRtxoQP",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -144
+      ],
+      "id": "a6d322d8-7e92-4a5b-b58e-b87a58a708d2",
+      "name": "Send a text message",
+      "webhookId": "568d064b-8f3f-4668-8c0d-d30f37b47345",
+      "credentials": {
+        "telegramApi": {
+          "id": "kAVpgAeh2uaGth1O",
+          "name": "MG_API_22Aug26"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0ddc0b7d-e67a-408d-9ccf-aaadd4bfd72a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b23094da4003c7e9828f4dcfb04bc9a96af465629f3868d87c3088b369dad58"
+  },
+  "nodeGroups": [],
+  "id": "9hGk36zBbNSPL8E0",
+  "tags": []
+}

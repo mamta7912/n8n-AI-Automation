@@ -1,0 +1,263 @@
+{
+  "name": "Demo3- Multi-Agent_CustomerFeedback-SentimentsAnalysis",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "CUSTOMER FEEDBACK FORM",
+        "formDescription": "Kindly give your valuable feedback for our Courses",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Name:",
+              "placeholder": "Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Email Id:",
+              "placeholder": "xyz@gmail.com",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Phone Number:",
+              "fieldType": "number",
+              "placeholder": "xxx-xxxxx-xxxxx",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your Feedback:",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "C/CPP"
+                  },
+                  {
+                    "option": "Block Programming"
+                  },
+                  {
+                    "option": "Dotnet"
+                  },
+                  {
+                    "option": "Agentic AI"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Feedback:",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Points",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "1"
+                  },
+                  {
+                    "option": "2"
+                  },
+                  {
+                    "option": "3"
+                  },
+                  {
+                    "option": "4"
+                  },
+                  {
+                    "option": "5"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -336,
+        -160
+      ],
+      "id": "8d8019eb-1981-436d-bc6f-991a722f57d7",
+      "name": "On form submission",
+      "webhookId": "e2590651-2335-4494-9e6e-5ab60464e46b"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        48
+      ],
+      "id": "d05b9206-08e6-4429-9b03-6396ea51f1d7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "28mdBmt6wajFpZNU",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "04a9ed96-a9c7-4903-a793-f0e533c78507",
+      "name": "Merge",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify the sentiment of the following customer feedback as exactly one word: \"Positive\" or \"Negative\". Do not add any explanation, punctuation, or extra words — respond with only the single word.\nCustomer Feedback: {{ $json['Feedback:'] }}\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -112,
+        -160
+      ],
+      "id": "b5a8ba4d-aae2-4db5-a1c7-733b18ecb48b",
+      "name": "Analyze Feedback"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are drafting a customer feedback response email for a car service business. Your output must be ONE complete, ready-to-send HTML email fragment — nothing else, no markdown, no code fences, no commentary before or after it.\n\nCustomer Name: {{ $('On form submission').item.json['Your Name:'] }}\nCustomer Feedback: {{ $('On form submission').item.json['Your Feedback:'] }}\nDetected Sentiment: {{ $('Analyze Feedback').item.json.text }}\n\nChoose exactly ONE of the two HTML templates below based on the Detected Sentiment above. Copy it EXACTLY as given, including every inline style attribute — do not change colors, spacing, or structure. Only replace the bracketed placeholders with real content. Output only the one chosen, filled-in template.\n\n===== TEMPLATE FOR POSITIVE SENTIMENT =====\n<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;\">\n<div style=\"background-color:#1a73e8;padding:28px 32px;\"><h1 style=\"color:#ffffff;font-size:20px;margin:0;font-weight:600;\">Thank You for Your Feedback!</h1></div>\n<div style=\"padding:32px;color:#333333;font-size:15px;line-height:1.7;\">\n<p style=\"margin:0 0 16px 0;\">Dear [Customer Name],</p>\n<p style=\"margin:0 0 16px 0;\">[Write a short, warm 2-3 sentence thank-you, genuinely appreciating their positive feedback and support.]</p>\n<p style=\"margin:24px 0 0 0;\">Warm regards,<br><strong>The AI Agent Guy</strong><br>Founder &amp; CEO</p>\n</div>\n<div style=\"background-color:#f5f7fa;padding:16px 32px;font-size:12px;color:#888888;text-align:center;\">We appreciate you being our customer.</div>\n</div>\n\n===== TEMPLATE FOR NEGATIVE SENTIMENT =====\n<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;\">\n<div style=\"background-color:#d93025;padding:28px 32px;\"><h1 style=\"color:#ffffff;font-size:20px;margin:0;font-weight:600;\">We're Sorry to Hear That</h1></div>\n<div style=\"padding:32px;color:#333333;font-size:15px;line-height:1.7;\">\n<p style=\"margin:0 0 16px 0;\">Dear [Customer Name],</p>\n<p style=\"margin:0 0 16px 0;\">[Write a thoughtful, empathetic 2-3 sentence message thanking them for their input, and sincerely ask how the service can be improved. Reference their concern in general terms without quoting it verbatim.]</p>\n<div style=\"background-color:#fff4e5;border:1px dashed #ff9800;border-radius:8px;padding:18px;margin:20px 0;text-align:center;\">\n<p style=\"margin:0 0 6px 0;font-size:13px;color:#555555;\">As a gesture of goodwill, enjoy</p>\n<p style=\"margin:0 0 6px 0;font-size:26px;font-weight:700;color:#ff9800;\">20% OFF</p>\n<p style=\"margin:0;font-size:13px;color:#555555;\">Use code <strong>SORRY20</strong> on your next visit</p>\n</div>\n<p style=\"margin:24px 0 0 0;\">Warm regards,<br><strong>The AI Agent Guy</strong><br>Founder &amp; CEO</p>\n</div>\n<div style=\"background-color:#f5f7fa;padding:16px 32px;font-size:12px;color:#888888;text-align:center;\">We're committed to making this right.</div>\n</div>\n\nDo not include <html>/<body> wrapper tags or a subject line — the subject is handled separately and this HTML fragment is inserted directly into the email body.\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        192
+      ],
+      "id": "3055987a-0061-4e8a-adcb-0c385771110c",
+      "name": "Analyze Sentiments"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json['Your Email Id:'] }}",
+        "subject": "=Feedback of Mr./Mrs.  {{ $('On form submission').item.json['Your Name:'] }}",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        192
+      ],
+      "id": "e78f7d2e-7cdf-409d-aa37-bd43adfd467e",
+      "name": "Send a message",
+      "webhookId": "0bba296d-60ae-4cde-a708-f7d79f3287c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hBQl0hcuJDZe6ZwC",
+          "name": "Gmail account 5"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Analyze Feedback",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analyze Feedback",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Analyze Sentiments",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Feedback": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Analyze Sentiments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Sentiments": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f37c9607-c82e-4e8c-9e7f-4bfbfdd08b76",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8b23094da4003c7e9828f4dcfb04bc9a96af465629f3868d87c3088b369dad58"
+  },
+  "nodeGroups": [],
+  "id": "gHKUeQKzTk1nB270",
+  "tags": []
+}

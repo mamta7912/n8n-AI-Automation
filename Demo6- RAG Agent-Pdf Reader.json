@@ -1,0 +1,295 @@
+{
+  "name": "Demo6- RAG Agent-Pdf Reader",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Talk with PDF",
+        "formDescription": "Upload pdf and talk with it",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload pdf",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -96,
+        -112
+      ],
+      "id": "55c6ac9c-0577-4091-9f4a-59ecbf3cfff3",
+      "name": "On form submission",
+      "webhookId": "0c12775f-bbd0-4d9a-aeab-0e522ef196db"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        -96
+      ],
+      "id": "46d8a057-e327-4828-9095-3f2af7e0ab28",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-embedding-2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        224,
+        288
+      ],
+      "id": "799cb810-d9e9-4000-829d-792d55812f6d",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        -48,
+        80
+      ],
+      "id": "cf9fc797-d66b-4e30-9dc0-f3156ce11cd6",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        240
+      ],
+      "id": "170429a4-c406-4513-a8c9-033d09f63ec8",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "b9a98231-e0af-45da-ac4d-5e528dbc32e3",
+      "name": "When chat message received",
+      "webhookId": "a8a4534a-13bc-482d-b33f-ff311a26c5ac"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant that answers questions about the PDF document the user most recently uploaded.\n\nIMPORTANT RULES:\n1. The content of the currently uploaded PDF is stored in a vector database. You MUST ALWAYS use the 'pdf_document_search' tool to search the document before answering ANY question.\n2. Never tell the user to upload a PDF - it is already uploaded and avaialble through the tool.\n3. Base your answers ONLY on what the tool returns for the current document. Do not use prior knowledge or assumptions about what the document might be.\n4. If the tool returns nothing relevant, say you could not find that information in the document.\n5. Keep answers short, simple, and easy to understand (explain like I'm 5)."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        752,
+        -64
+      ],
+      "id": "290fa36e-a35d-40b1-8f5b-5cda1543bebd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        144
+      ],
+      "id": "25a847f1-f443-4c47-8f83-9199bdaef32a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GL8GkDZ2gOIxVOuq",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        144
+      ],
+      "id": "706d40f4-eddd-4048-82c9-c321dab1c609",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the uploaded pdf document's content. ALWAYS use this tool to find relevant information from PDF before answering any user question. Input should be the users question or key search terms from it.",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        },
+        "topK": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        288
+      ],
+      "id": "43ede6f3-3e4d-480f-9a2f-83fe8a481349",
+      "name": "Simple Vector Store1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Simple Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bd2fb41e-d03b-43ea-b89a-d3641066397b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acb6cf977bd219dcf53ac18690935f2fb17d78de7f77513d0a31aee4747b58ea"
+  },
+  "nodeGroups": [],
+  "id": "AE8UFESP4E4yyXGL",
+  "tags": []
+}

@@ -1,0 +1,420 @@
+{
+  "name": "Demo5-MG_RestaurantOrderMgmt_02Sep26",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Act as a Ordering Assistant for The Nice Cafe\n\nRules:\n\n1. When a user sends their first message (like hi, hello), reply with:\nWelcome to The Nice Cafe \n\nHow can I help you today?\n Place an order \nFAQ / Information\nCheck order / Stock\n\n(Keep the tone friendly like a food delivery app)\n\n2. If user wants to order:\n-Ask step by step: name, food item, quantity, mobile number\n- Check Inventory sheet before confirming\n-If available: Your order for [item] (x quantity) is confirmed\n- If not available: Sorry, [item] is out of stock. Available Options:[list items]\n- only confirmed orders go into the Order's sheet\n-Include Status: Confirmed / Rejected\n\n3. If user wants FAQ:\n-Answer short and clear (Delivery time, payment method, restaurant hours)\n\n4. If user wants to check order or stock:\n-Ask for food name or order ID\n-Look up in Google Sheets(Orders / Inventory)\n-Reply with status or available quantity\n\n5. Delivery Information:\n-Standard delivery time is 30 minutes\n\n6. If user wants to cancel order:\n-Reply: Sorry, I cannot cancel orders directly. Please call the restaurant owner.\n-Owner Contact: +91 9755650338\n\n7. Food Taste and Recipe Quesries:\n-Provide customer-friendly taste profiles\n-Examples: Mild / Medium spicy / Hot / Sweet / Tangy / Creamy\n\nAlways be friendly, use emojis, and maintain a conversational tone!\n\nBe careful about combo selection do not give answer as per your own so refer combo package sheet"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        112,
+        -176
+      ],
+      "id": "df85a011-7c62-4b09-a39e-4ad9291be877",
+      "name": "AI Conversation Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -192,
+        64
+      ],
+      "id": "2f14a9ac-10b1-4e94-b823-24a2db7fb1af",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GL8GkDZ2gOIxVOuq",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -80,
+        64
+      ],
+      "id": "54fa9d01-d20a-4190-bc53-62d51a8ad885",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs",
+          "mode": "list",
+          "cachedResultName": "Restaurent Order Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        64,
+        64
+      ],
+      "id": "4466e1d8-0002-4ef3-9469-6e9eb52678b0",
+      "name": "Inventory_Stock_Manager",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hcpKb63S1WcMsB4Q",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nThis is Vinay from The NICE Cafe. What would you like to order?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -432,
+        -176
+      ],
+      "id": "b238f5b7-4c35-42e1-bc00-e68ff84116b7",
+      "name": "When chat message received",
+      "webhookId": "b68c0793-bad6-43d1-9bb8-408b5867d5f9"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs",
+          "mode": "list",
+          "cachedResultName": "Restaurent Order Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 556676237,
+          "mode": "list",
+          "cachedResultName": "Price",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit#gid=556676237"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        64
+      ],
+      "id": "eb6db422-a3e9-4ecb-b3c9-ca3f50e3e5ce",
+      "name": "Menu_Pricing_Catalog",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hcpKb63S1WcMsB4Q",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs",
+          "mode": "list",
+          "cachedResultName": "Restaurent Order Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1277344500,
+          "mode": "list",
+          "cachedResultName": "FAQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit#gid=1277344500"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        64
+      ],
+      "id": "686b3c6f-2f4e-4691-b648-c4587820f55f",
+      "name": "FAQ_Knowledgebase",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hcpKb63S1WcMsB4Q",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs",
+          "mode": "list",
+          "cachedResultName": "Restaurent Order Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 619130334,
+          "mode": "list",
+          "cachedResultName": "Order",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit#gid=619130334"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Customer Name": "={{ $fromAI('Customer_Name', ``, 'string') }}",
+            "Mobile No": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Mobile_No', ``, 'string') }}",
+            "Food Item": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Food_Item', ``, 'string') }}",
+            "Orderd Quantity": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Orderd_Quantity', ``, 'string') }}",
+            "Order Date": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Order_Date', ``, 'string') }}",
+            "Status": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Status', ``, 'string') }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile No",
+              "displayName": "Mobile No",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food Item",
+              "displayName": "Food Item",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Orderd Quantity",
+              "displayName": "Orderd Quantity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Order Date",
+              "displayName": "Order Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        64
+      ],
+      "id": "c32c8a5d-6a64-48ce-9214-065ca5590cc3",
+      "name": "Order",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hcpKb63S1WcMsB4Q",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs",
+          "mode": "list",
+          "cachedResultName": "Restaurent Order Tracking",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 433847062,
+          "mode": "list",
+          "cachedResultName": "Combo Package",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1YL11p98n9eEnFPAJ3jFOpQcvrYCtKm3l3qJsMoIQvBs/edit#gid=433847062"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        64
+      ],
+      "id": "bff0e26c-e76f-44ca-bced-c64a0a0879b5",
+      "name": "Combo_Package",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hcpKb63S1WcMsB4Q",
+          "name": "Google Sheets account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Inventory_Stock_Manager": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Menu_Pricing_Catalog": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ_Knowledgebase": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Order": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combo_Package": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Conversation Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "933f9be2-4a11-47bb-8a69-f32ba1c2578b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acb6cf977bd219dcf53ac18690935f2fb17d78de7f77513d0a31aee4747b58ea"
+  },
+  "nodeGroups": [],
+  "id": "OkCL14EsjcH1T0Qg",
+  "tags": []
+}

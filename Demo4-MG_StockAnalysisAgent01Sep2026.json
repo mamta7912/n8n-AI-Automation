@@ -1,0 +1,375 @@
+{
+  "name": "Demo4-MG_StockAnalysisAgent01Sep2026",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -416,
+        -176
+      ],
+      "id": "760233d1-689a-40cf-a43a-b7e76ddf9c80",
+      "name": "When chat message received",
+      "webhookId": "cf5d7e9a-0bdf-483d-8997-6f113838ba8d"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -448,
+        64
+      ],
+      "id": "06768ca1-4af6-4386-9949-7ca8253150ea",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "GL8GkDZ2gOIxVOuq",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -256,
+        64
+      ],
+      "id": "b0af6268-9960-499f-8efb-2dd738050eef",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an Orchestrator Agent.\nYour role:\n1. Call the Fundamental Analysis Tool exactly once and the Technical Analysis Tool exactly once with the user query.\n2. Collect both outputs.\n3. Combine them into one clear, structured response.\n\nCRITICAL RULES:\n- This output is emailed automatically — there is NO human to reply to. NEVER ask the user questions or offer options.\n- Call each tool only ONCE. Do not retry a tool if it returns a partial or error result — use whatever it returned.\n- Always produce all three sections below, even if a tool failed (write No data available under a section if needed). The Final Summary must always contain a brief 2-3 bullet takeaway.\n\nOutput format:\n- Fundamental Insights:\n- Technical Insights:\n- Final Summary:\nBe concise, no assumptions, only use agent outputs.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -160,
+        -144
+      ],
+      "id": "8943d1db-4d06-48f5-8b8b-af9aab857987",
+      "name": "Orchestrator Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "use this Fundamental Analysis tool only once per user request",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a Fundamental Analysis Agent specializing in stocks and cryptocurrencies.\n\nYour role:\n1. Call the search tool AT MOST 3 times to find recent data: news, earnings reports, revenue figures, macro trends, regulatory news, and market sentiment.\n2. Analyze factors such as: revenue growth, profit margins, industry position, partnerships, upcoming catalysts, and overall market sentiment.\n\nCRITICAL RULES:\n- This output is emailed automatically — there is NO human to reply to. NEVER ask the user questions, NEVER offer options, and NEVER ask for clarification.\n- Do NOT keep retrying the search. If after up to 3 searches the results are irrelevant, empty, or unusable, STOP searching and give your best-effort analysis from your own knowledge, adding: (Note: live search data was unavailable; based on general/offline knowledge and may be out of date.)\n- Always return a completed analysis in the format below. Never end without an answer.\n\nOutput format (always follow this exactly):\n---\n📌 **Key Findings:**\n- [Finding 1]\n- [Finding 2]\n- [Finding 3]\n\n💬 **Market Sentiment:** [Positive / Negative / Mixed]\n\n📊 **Fundamental View:** [Bullish / Bearish / Neutral]\n[1-2 sentence justification]\n---\n\nBe concise, factual, and insight-driven.\n",
+          "maxIterations": 15
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        48
+      ],
+      "id": "69dfc39e-3f22-471f-b0bd-bcd2e7fef725",
+      "name": "Fundamental Analysis Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        240
+      ],
+      "id": "92db00b2-097d-4408-92ad-71ccdfa69cbd",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "GL8GkDZ2gOIxVOuq",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        48,
+        272
+      ],
+      "id": "0dd7d182-5695-4e05-b03a-d5f030ae359f",
+      "name": "Google search in SerpApi",
+      "credentials": {
+        "serpApi": {
+          "id": "aPtP9lcdzakgbBhu",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this Technical Analysis Tool only once per user request",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a Technical Analysis Agent specializing in stocks and cryptocurrencies.\n\nYour role:\n1. Call the search tool AT MOST 3 times to find recent price data, chart patterns, momentum indicators (RSI, MACD, EMA), and volume trends.\n2. Identify: the current trend direction, key support and resistance levels, and indicator signals.\n\nCRITICAL RULES:\n- This output is emailed automatically — there is NO human to reply to. NEVER ask the user questions, NEVER offer options, and NEVER ask for price input or clarification.\n- Do NOT keep retrying the search. If after up to 3 searches the results are irrelevant, empty, or unusable, STOP searching and give your best-effort analysis from your own knowledge, adding: (Note: live market data was unavailable; based on general/offline knowledge and may be out of date.)\n- Always return a completed analysis in the format below. Never end without an answer.\n\nOutput format (always follow this exactly):\n---\n📈 **Trend:** [Uptrend / Downtrend / Sideways]\n[Brief description of trend on daily/weekly timeframe]\n\n🎯 **Key Levels:**\n- Support: $[level]\n- Resistance: $[level]\n\n⚡ **Indicator Signals:**\n- RSI: [value] ([Overbought / Oversold / Neutral])\n- MACD: [Bullish crossover / Bearish crossover / Flat]\n- EMA: [Price above/below key EMAs]\n\n📊 **Technical View:** [Bullish / Bearish / Neutral]\n[1-2 sentence justification]\n---\n\nBe concise and data-driven.",
+          "maxIterations": 15
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 3,
+      "position": [
+        192,
+        48
+      ],
+      "id": "f31102ab-d589-49ef-b3ce-2f7deb15926d",
+      "name": "Technical Analysis Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        240
+      ],
+      "id": "1cdd6b23-3d3c-4e84-afbd-1c6b19cfacab",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "GL8GkDZ2gOIxVOuq",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        368,
+        224
+      ],
+      "id": "6d32f22f-caea-4fd7-8f26-44cfa3794382",
+      "name": "Google search in SerpApi1",
+      "credentials": {
+        "serpApi": {
+          "id": "aPtP9lcdzakgbBhu",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output from the Orchestrator Agent\nconst input = $input.first().json;\n\n// n8n AI Agent output is normally available in \"output\"\nconst rawOutput =\n  input.output ||\n  input.text ||\n  input.response ||\n  JSON.stringify(input);\n\n// Convert to string\nconst content = String(rawOutput);\n\n// ---------------------------------------------------------\n// Helper functions\n// ---------------------------------------------------------\n\nfunction escapeHtml(text) {\n  return String(text)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#039;');\n}\n\nfunction markdownToHtml(text) {\n  let html = escapeHtml(text);\n\n  // Bold: **text**\n  html = html.replace(\n    /\\*\\*(.*?)\\*\\*/g,\n    '<strong>$1</strong>'\n  );\n\n  // Headings / horizontal separators\n  html = html.replace(/^---$/gm, '');\n\n  // Bullet points\n  html = html.replace(\n    /^\\s*[-•]\\s+(.*)$/gm,\n    '<li>$1</li>'\n  );\n\n  // Wrap consecutive list items\n  html = html.replace(\n    /(<li>.*?<\\/li>\\s*)+/gs,\n    match => `<ul>${match}</ul>`\n  );\n\n  // Line breaks\n  html = html.replace(/\\n/g, '<br>');\n\n  return html;\n}\n\n// ---------------------------------------------------------\n// Extract the three sections from Orchestrator output\n// ---------------------------------------------------------\n\nfunction extractSection(startPatterns, endPatterns) {\n  let start = -1;\n  let end = content.length;\n\n  for (const pattern of startPatterns) {\n    const regex = new RegExp(pattern, 'i');\n    const match = regex.exec(content);\n\n    if (match) {\n      start = match.index + match[0].length;\n      break;\n    }\n  }\n\n  if (start === -1) {\n    return '';\n  }\n\n  for (const pattern of endPatterns) {\n    const regex = new RegExp(pattern, 'i');\n    const remaining = content.substring(start);\n    const match = regex.exec(remaining);\n\n    if (match) {\n      end = start + match.index;\n      break;\n    }\n  }\n\n  return content.substring(start, end).trim();\n}\n\n// ---------------------------------------------------------\n// Extract Fundamental Analysis\n// ---------------------------------------------------------\n\nconst fundamental = extractSection(\n  [\n    'Fundamental\\\\s+(?:Insights|Analysis)',\n    '📌\\\\s*Fundamental'\n  ],\n  [\n    'Technical\\\\s+(?:Insights|Analysis)',\n    '📈\\\\s*Technical'\n  ]\n);\n\n// ---------------------------------------------------------\n// Extract Technical Analysis\n// ---------------------------------------------------------\n\nconst technical = extractSection(\n  [\n    'Technical\\\\s+(?:Insights|Analysis)',\n    '📈\\\\s*Technical'\n  ],\n  [\n    'Final\\\\s+Summary',\n    '🎯\\\\s*Final'\n  ]\n);\n\n// ---------------------------------------------------------\n// Extract Final Summary\n// ---------------------------------------------------------\n\nconst summary = extractSection(\n  [\n    'Final\\\\s+Summary',\n    '🎯\\\\s*Final'\n  ],\n  []\n);\n\n// ---------------------------------------------------------\n// Fallback if section extraction doesn't work\n// ---------------------------------------------------------\n\nconst fundamentalHtml = fundamental\n  ? markdownToHtml(fundamental)\n  : '<p>No fundamental analysis data available.</p>';\n\nconst technicalHtml = technical\n  ? markdownToHtml(technical)\n  : '<p>No technical analysis data available.</p>';\n\nconst summaryHtml = summary\n  ? markdownToHtml(summary)\n  : '<p>No final summary available.</p>';\n\n// ---------------------------------------------------------\n// Current date\n// ---------------------------------------------------------\n\nconst generatedDate = new Date().toLocaleString('en-IN', {\n  timeZone: 'Asia/Kolkata',\n  dateStyle: 'medium',\n  timeStyle: 'short'\n});\n\n// ---------------------------------------------------------\n// Create professional HTML email\n// ---------------------------------------------------------\n\nconst html = `\n<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n\n<style>\n\nbody {\n  margin: 0;\n  padding: 0;\n  background-color: #f4f6f8;\n  font-family: Arial, Helvetica, sans-serif;\n  color: #263238;\n}\n\n.container {\n  max-width: 850px;\n  margin: 20px auto;\n  background: #ffffff;\n  border-radius: 12px;\n  overflow: hidden;\n  box-shadow: 0 3px 12px rgba(0,0,0,0.10);\n}\n\n.header {\n  background: linear-gradient(135deg, #172554, #2563eb);\n  color: white;\n  padding: 25px 30px;\n}\n\n.header h1 {\n  margin: 0;\n  font-size: 25px;\n}\n\n.header p {\n  margin: 8px 0 0;\n  font-size: 13px;\n  opacity: 0.9;\n}\n\n.section {\n  margin: 22px 25px;\n  border-radius: 10px;\n  overflow: hidden;\n  border: 1px solid #e5e7eb;\n}\n\n.section-title {\n  padding: 13px 18px;\n  font-size: 18px;\n  font-weight: bold;\n  color: white;\n}\n\n.fundamental-title {\n  background: linear-gradient(90deg, #047857, #10b981);\n}\n\n.technical-title {\n  background: linear-gradient(90deg, #1d4ed8, #3b82f6);\n}\n\n.summary-title {\n  background: linear-gradient(90deg, #b45309, #f59e0b);\n}\n\n.section-content {\n  padding: 18px 20px;\n  line-height: 1.6;\n  font-size: 14px;\n  background: #ffffff;\n}\n\n.section-content ul {\n  padding-left: 22px;\n}\n\n.section-content li {\n  margin-bottom: 7px;\n}\n\n.summary-content {\n  background: #fffbeb;\n}\n\n.footer {\n  text-align: center;\n  padding: 18px;\n  font-size: 11px;\n  color: #6b7280;\n  background: #f9fafb;\n}\n\nstrong {\n  color: #111827;\n}\n\n</style>\n\n</head>\n\n<body>\n\n<div class=\"container\">\n\n  <!-- HEADER -->\n\n  <div class=\"header\">\n    <h1>📊 Stock & Crypto Analysis Report</h1>\n    <p>AI-powered Fundamental + Technical Analysis</p>\n    <p>Generated: ${generatedDate}</p>\n  </div>\n\n\n  <!-- FUNDAMENTAL ANALYSIS -->\n\n  <div class=\"section\">\n\n    <div class=\"section-title fundamental-title\">\n      📌 Fundamental Analysis\n    </div>\n\n    <div class=\"section-content\">\n      ${fundamentalHtml}\n    </div>\n\n  </div>\n\n\n  <!-- TECHNICAL ANALYSIS -->\n\n  <div class=\"section\">\n\n    <div class=\"section-title technical-title\">\n      📈 Technical Analysis\n    </div>\n\n    <div class=\"section-content\">\n      ${technicalHtml}\n    </div>\n\n  </div>\n\n\n  <!-- FINAL SUMMARY -->\n\n  <div class=\"section\">\n\n    <div class=\"section-title summary-title\">\n      🎯 Final Summary\n    </div>\n\n    <div class=\"section-content summary-content\">\n      ${summaryHtml}\n    </div>\n\n  </div>\n\n\n  <div class=\"footer\">\n    This report is generated automatically by your Stock & Crypto Analysis Agent.\n    <br>\n    Information is for research and educational purposes only and should not be\n    considered financial advice.\n  </div>\n\n</div>\n\n</body>\n</html>\n`;\n\n// ---------------------------------------------------------\n// Return data for Gmail node\n// ---------------------------------------------------------\n\nreturn [\n  {\n    json: {\n      ...input,\n\n      subject: `📊 Stock & Crypto Analysis Report - ${generatedDate}`,\n\n      emailHtml: html,\n\n      // Keep original AI output available for debugging\n      rawAnalysis: content\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        -144
+      ],
+      "id": "6b3fb676-70a2-4154-9feb-cb95963bf35d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "vinay_gupta2004@yahoo.com",
+        "subject": "={{ $('When chat message received').item.json.chatInput }}",
+        "message": "={{ $json.emailHtml }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Mamta"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        -144
+      ],
+      "id": "f3c95a20-2c43-4245-9e39-df97b126958a",
+      "name": "Send a message",
+      "webhookId": "3fe058a5-b213-48c5-b658-940f6d41c847",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "RjKDjz4tM7GM2T8a",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fundamental Analysis Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Fundamental Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Fundamental Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Technical Analysis Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Technical Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Technical Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f15c1316-868c-4e8c-a17f-f0ae4b263170",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "acb6cf977bd219dcf53ac18690935f2fb17d78de7f77513d0a31aee4747b58ea"
+  },
+  "nodeGroups": [],
+  "id": "VtnOohYBXyXXBbDg",
+  "tags": []
+}

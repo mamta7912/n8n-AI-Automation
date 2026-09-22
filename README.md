@@ -34,7 +34,7 @@ User message → Telegram Trigger → AI Agent → LLM + Memory → Tools → Fi
 Demo 3: Customer Feedback Agent
 
 The use case:
-A customer fills a feedback form for a business. AI analyzes whether the feedback is Positive or Negative. AI prepares a suitable response email.
+A customer fills a feedback form for a business. AI analyzes whether the feedback is Positive or Negative and prepares a suitable response email.
 Gmail sends the response to the customer.
 
 The workflow structure:
